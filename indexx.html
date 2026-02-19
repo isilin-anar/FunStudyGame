@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파이썬 매트릭스 - 완전판</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0f0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .code-rain {
+            position: absolute;
+            color: #0f0;
+            font-size: 14px;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 5px #0f0;
+        }
+        
+        .content {
+            text-align: center;
+            z-index: 100;
+        }
+        
+        .title {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px #0f0;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #0f0;
+            margin-bottom: 2rem;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .stage-select {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #0f0;
+            border-radius: 10px;
+            padding: 2rem;
+            max-width: 700px;
+            margin: 0 auto;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .stage-title {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            text-shadow: 0 0 10px #0f0;
+        }
+        
+        .stage-item {
+            border: 1px solid #0f0;
+            border-radius: 5px;
+            padding: 1rem;
+            margin: 1rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .stage-item:hover {
+            background: rgba(0, 255, 0, 0.1);
+            box-shadow: 0 0 10px #0f0;
+        }
+        
+        .button {
+            background: transparent;
+            border: 2px solid #0f0;
+            color: #0f0;
+            padding: 12px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            margin: 10px;
+            display: inline-block;
+            min-width: 150px;
+        }
+        
+        .button:hover {
+            background: #0f0;
+            color: #000;
+            box-shadow: 0 0 15px #0f0;
+            transform: scale(1.05);
+        }
+        
+        /* 학습 화면 */
+        .learning-container {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #0f0;
+            border-radius: 10px;
+            padding: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .step-content {
+            min-height: 400px;
+        }
+        
+        .theory-box {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #0f0;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .code-input {
+            background: #111;
+            border: 2px solid #0f0;
+            color: #0f0;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            width: 100%;
+            border-radius: 5px;
+            min-height: 100px;
+        }
+        
+        .code-input:focus {
+            outline: none;
+            box-shadow: 0 0 10px #0f0;
+        }
+        
+        .code-output {
+            background: #000;
+            border: 2px solid #0f0;
+            color: #0f0;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            width: 100%;
+            min-height: 100px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        
+        .quiz-option {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #0f0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .quiz-option:hover {
+            background: rgba(0, 255, 0, 0.1);
+        }
+        
+        /* 게임 화면 */
+        .game-container {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #0f0;
+            border-radius: 10px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #0f0;
+        }
+        
+        .game-title {
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px #0f0;
+        }
+        
+        .game-stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat {
+            color: #0f0;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        
+        .game-area {
+            position: relative;
+            height: 500px;
+            background: #000;
+            border: 2px solid #0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        
+        .game-instructions {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #0f0;
+            padding: 40px;
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #0f0;
+            border-radius: 10px;
+            max-width: 80%;
+            width: 80%;
+        }
+        
+        .falling-code {
+            position: absolute;
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #0f0;
+            border-radius: 5px;
+            padding: 15px;
+            min-width: 280px;
+            min-height: 60px;
+            text-align: center;
+            font-size: 16px;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        
+        .code-text {
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 18px;
+            line-height: 1.2;
+            word-break: break-all;
+            white-space: pre;
+        }
+        
+        .code-translation {
+            color: #ff0;
+            font-size: 14px;
+            line-height: 1.3;
+        }
+        
+        .game-input {
+            width: 100%;
+            background: #111;
+            border: 2px solid #0f0;
+            color: #0f0;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            border-radius: 5px;
+        }
+        
+        .game-input:focus {
+            outline: none;
+            box-shadow: 0 0 10px #0f0;
+        }
+        
+        .difficulty-options {
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .difficulty-options label {
+            display: inline-block;
+            margin: 8px;
+            padding: 8px 15px;
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #0f0;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .difficulty-options input[type="radio"] {
+            margin-right: 8px;
+        }
+        
+        .success {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #0f0;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        .error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #f00;
+            color: #f00;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        
+        @keyframes fall {
+            to { transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <div class="matrix-bg" id="matrixBg"></div>
+    
+    <!-- 인트로 화면 -->
+    <div id="introScreen">
+        <div class="content" onclick="goToStageSelect()" style="cursor: pointer;">
+            <h1 class="title">PYTHON MATRIX</h1>
+            <p class="subtitle">파이썬 코딩의 모든 것을 매트릭스처럼 배우세요</p>
+        </div>
+    </div>
+    
+    <!-- 단계 선택 화면 -->
+    <div id="stageScreen" class="hidden">
+        <div class="stage-select">
+            <h2 class="stage-title">학습 단계 선택</h2>
+            
+            <div class="stage-item" onclick="selectStage(1)">
+                <h3>단계 1: 파이썬 기초 - 변수와 자료형</h3>
+                <p>변수 선언, 정수, 문자열, 불리언 등 기본 자료형 학습</p>
+            </div>
+            
+            <div class="stage-item" onclick="selectStage(2)">
+                <h3>단계 2: 리스트와 반복문</h3>
+                <p>리스트 생성, for 반복문으로 데이터 처리하기</p>
+            </div>
+            
+            <div class="stage-item" onclick="selectStage(3)">
+                <h3>단계 3: 조건문과 함수</h3>
+                <p>if 조건문, def 함수로 구조화된 프로그램 만들기</p>
+            </div>
+            
+            <div class="stage-item" onclick="selectStage('game')">
+                <h3>🎮 코드 낙하 게임</h3>
+                <p>파이썬 코드를 맞추는 3분 타이머 게임</p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <button class="button" onclick="goToIntro()">← 뒤로 가기</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 학습 화면 -->
+    <div id="learningScreen" class="hidden">
+        <div class="learning-container">
+            <div id="step1" class="step-content">
+                <h3 style="font-size: 1.5rem; margin-bottom: 20px; color: #0ff;">📚 이론 학습</h3>
+                <div class="theory-box">
+                    <h4 style="color: #0ff; margin-bottom: 10px;">파이썬 변수란?</h4>
+                    <p>변수는 데이터를 저장하는 공간입니다. 변수명으로 데이터를 저장하고 불러올 수 있습니다.</p>
+                    
+                    <h4 style="color: #0ff; margin: 20px 0 10px;">변수 명명 규칙</h4>
+                    <ul style="margin-left: 20px;">
+                        <li>영문자, 숫자, 언더스코어(_) 사용 가능</li>
+                        <li>숫자로 시작 불가</li>
+                        <li>대소문자 구분</li>
+                        <li>파이썬 예약어 사용 불가</li>
+                    </ul>
+                    
+                    <h4 style="color: #0ff; margin: 20px 0 10px;">주요 자료형</h4>
+                    <div style="background: #111; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                        <p style="color: #0ff;">정수 (int):</p> <code>age = 25</code><br>
+                        <p style="color: #0ff;">문자열 (str):</p> <code>name = '홍길동'</code><br>
+                        <p style="color: #0ff;">불리언 (bool):</p> <code>is_student = True</code>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 2rem;">
+                    <button class="button" onclick="showQuiz()">다음 →</button>
+                </div>
+            </div>
+            
+            <div id="quiz" class="step-content hidden">
+                <h3 style="font-size: 1.5rem; margin-bottom: 20px; color: #0ff;">📝 퀴즈</h3>
+                <div class="theory-box">
+                    <p style="margin-bottom: 20px;"><strong>다음 중 올바른 변수 선언은?</strong></p>
+                    <label class="quiz-option">
+                        <input type="radio" name="answer" value="0"> var name = '홍길동'
+                    </label>
+                    <label class="quiz-option">
+                        <input type="radio" name="answer" value="1"> name = '홍길동'
+                    </label>
+                    <label class="quiz-option">
+                        <input type="radio" name="answer" value="2"> string name = '홍길동'
+                    </label>
+                    
+                    <div id="quizResult" style="margin-top: 20px;"></div>
+                    
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button class="button" onclick="checkQuiz()">정답 확인</button>
+                        <button id="nextToCoding" class="button hidden" onclick="showCoding()">다음 →</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="coding" class="step-content hidden">
+                <h3 style="font-size: 1.5rem; margin-bottom: 20px; color: #0ff;">💻 코드 실습</h3>
+                <div class="theory-box">
+                    <p style="margin-bottom: 15px;"><strong>📋 미션:</strong></p>
+                    <p>변수 'my_name'에 당신의 이름을 저장하고 출력하는 코드를 작성하세요.</p>
+                    
+                    <div style="margin-top: 20px;">
+                        <label style="display: block; margin-bottom: 10px;">코드를 작성하세요 (Enter: 실행):</label>
+                        <textarea id="codeInput" class="code-input" placeholder="여기에 코드를 작성하세요...
+my_name = '당신의이름'
+print(my_name)"></textarea>
+                    </div>
+                    
+                    <div style="margin-top: 20px;">
+                        <label style="display: block; margin-bottom: 10px;">실행 결과:</label>
+                        <div id="codeOutput" class="code-output">코드를 실행하면 결과가 여기에 표시됩니다.</div>
+                    </div>
+                    
+                    <div id="codeResult" style="margin-top: 20px;"></div>
+                    
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button class="button" onclick="runCode()">코드 실행</button>
+                        <button class="button" onclick="showHint()">힌트 보기</button>
+                        <button id="completeBtn" class="button hidden" onclick="completeStage()">완료</button>
+                    </div>
+                    
+                    <div id="hintBox" style="margin-top: 20px; display: none;">
+                        <div class="success">
+                            <p>💡 힌트:</p>
+                            <code>my_name = '당신의이름'<br>print(my_name)</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+            <button class="button" onclick="goBackToStageSelect()">← 뒤로 가기</button>
+        </div>
+    </div>
+    
+    <!-- 코드 낙하 게임 화면 -->
+    <div id="gameScreen" class="hidden">
+        <div class="game-container">
+            <div class="game-header">
+                <div class="game-title">🎮 코드 낙하 게임</div>
+                <div class="game-stats">
+                    <div class="stat">점수: <span id="score">0</span></div>
+                    <div class="stat">시간: <span id="timer">3:00</span></div>
+                </div>
+            </div>
+            
+            <div class="game-area" id="gameArea">
+                <div class="game-instructions" id="gameInstructions">
+                    <h3>🎮 게임 규칙</h3>
+                    <ul style="list-style: none; padding: 0; text-align: left; margin-top: 15px;">
+                        <li>▸ 화면 위에서 파이썬 코드가 내려옵니다</li>
+                        <li>▸ 옆에 표시되는 한국어 뜻을 보고 코드를 타이핑하세요</li>
+                        <li>▸ 제한 시간은 3분입니다</li>
+                        <li>▸ 바닥에 닿기 전에 정확히 타이핑해야 점수를 얻습니다</li>
+                    </ul>
+                    
+                    <div class="difficulty-options">
+                        <h4 style="color: #0ff;">🎯 난이도 선택</h4>
+                        <label><input type="radio" name="difficulty" value="easy" checked> 초초보자 (40초)</label>
+                        <label><input type="radio" name="difficulty" value="normal"> 초보자 (25초)</label>
+                        <label><input type="radio" name="difficulty" value="hard"> 보통 (15초)</label>
+                        <label><input type="radio" name="difficulty" value="extreme"> 어려움 (10초)</label>
+                    </div>
+                    
+                    <button class="button" onclick="startGame()">🚀 게임 시작</button>
+                </div>
+            </div>
+            
+            <div>
+                <input type="text" id="gameInput" class="game-input" placeholder="여기에 코드를 입력하고 엔터를 치세요..." disabled>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 1rem;">
+            <button class="button" onclick="goBackToStageSelect()">← 뒤로 가기</button>
+        </div>
+    </div>
+    
+    <script>
+        // 매트릭스 배경 코드 비 생성
+        function createMatrixRain() {
+            const matrixBg = document.getElementById('matrixBg');
+            const cols = Math.floor(window.innerWidth / 20);
+            
+            for (let i = 0; i < cols; i++) {
+                const column = document.createElement('div');
+                column.className = 'code-rain';
+                column.style.left = i * 20 + 'px';
+                column.style.animationDuration = (3 + Math.random() * 7) + 's';
+                
+                let chars = '';
+                for (let j = 0; j < 20; j++) {
+                    const char = String.fromCharCode(33 + Math.floor(Math.random() * 94));
+                    const opacity = 1 - (j / 20);
+                    const color = j === 19 ? '#fff' : '#0f0';
+                    chars += `<div style="opacity: ${opacity}; color: ${color};">${char}</div>`;
+                }
+                column.innerHTML = chars;
+                column.style.animation = `fall ${3 + Math.random() * 7}s linear infinite`;
+                matrixBg.appendChild(column);
+            }
+        }
+        
+        // 화면 전환 함수들
+        function goToStageSelect() {
+            document.getElementById('introScreen').classList.add('hidden');
+            document.getElementById('stageScreen').classList.remove('hidden');
+        }
+        
+        function goToIntro() {
+            document.getElementById('stageScreen').classList.add('hidden');
+            document.getElementById('introScreen').classList.remove('hidden');
+        }
+        
+        function goBackToStageSelect() {
+            document.getElementById('learningScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('stageScreen').classList.remove('hidden');
+        }
+        
+        function selectStage(stage) {
+            if (stage === 'game') {
+                document.getElementById('stageScreen').classList.add('hidden');
+                document.getElementById('gameScreen').classList.remove('hidden');
+                initGame();
+            } else if (stage === 1) {
+                document.getElementById('stageScreen').classList.add('hidden');
+                document.getElementById('learningScreen').classList.remove('hidden');
+                initLearning();
+            } else {
+                alert(`📚 단계 ${stage} 학습 기능은 개발 중입니다!`);
+            }
+        }
+        
+        // 학습 기능
+        function initLearning() {
+            const codeInput = document.getElementById('codeInput');
+            codeInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    runCode();
+                }
+            });
+        }
+        
+        function showQuiz() {
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('quiz').classList.remove('hidden');
+        }
+        
+        function checkQuiz() {
+            const selected = document.querySelector('input[name="answer"]:checked');
+            const result = document.getElementById('quizResult');
+            
+            if (!selected) {
+                alert('답변을 선택해주세요.');
+                return;
+            }
+            
+            const answer = parseInt(selected.value);
+            
+            if (answer === 1) {
+                result.className = 'success';
+                result.innerHTML = '✓ 정답입니다! 파이썬에서는 변수명 = 값 형식으로 변수를 선언합니다.';
+                document.getElementById('nextToCoding').classList.remove('hidden');
+            } else {
+                result.className = 'error';
+                result.innerHTML = '✗ 오답입니다. 다시 생각해보세요.';
+            }
+        }
+        
+        function showCoding() {
+            document.getElementById('quiz').classList.add('hidden');
+            document.getElementById('coding').classList.remove('hidden');
+            document.getElementById('codeInput').focus();
+        }
+        
+        function runCode() {
+            const code = document.getElementById('codeInput').value.trim();
+            const result = document.getElementById('codeResult');
+            const output = document.getElementById('codeOutput');
+            
+            if (!code) {
+                output.textContent = '코드를 입력해주세요.';
+                output.style.color = '#ff0';
+                return;
+            }
+            
+            // 간단한 파이썬 코드 해석기
+            setTimeout(() => {
+                try {
+                    const lines = code.split('\n');
+                    let result = '';
+                    let variables = {};
+                    
+                    for (let line of lines) {
+                        line = line.trim();
+                        if (!line) continue;
+                        
+                        // 변수 할당 처리
+                        if (line.includes('=')) {
+                            const match = line.match(/(\w+)\s*=\s*(.+)/);
+                            if (match) {
+                                let value = match[2];
+                                if (value.startsWith("'") || value.startsWith('"')) {
+                                    value = value.slice(1, -1);
+                                }
+                                variables[match[1]] = value;
+                            }
+                        }
+                        
+                        // print() 처리
+                        if (line.includes('print(')) {
+                            const match = line.match(/print\((.*)\)/);
+                            if (match) {
+                                let content = match[1];
+                                if (variables[content]) {
+                                    content = variables[content];
+                                }
+                                if ((content.startsWith("'") && content.endsWith("'")) || 
+                                    (content.startsWith('"') && content.endsWith('"'))) {
+                                    content = content.slice(1, -1);
+                                }
+                                if (result) result += '\n';
+                                result += content;
+                            }
+                        }
+                    }
+                    
+                    if (result) {
+                        output.textContent = result;
+                        output.style.color = '#0f0';
+                    } else {
+                        output.textContent = '(출력 없음)';
+                        output.style.color = '#0f0';
+                    }
+                } catch (error) {
+                    output.textContent = '코드 실행 오류: ' + error.message;
+                    output.style.color = '#f00';
+                }
+            }, 100);
+            
+            // 정답 확인
+            const isValidPython = 
+                code.includes('my_name') && 
+                code.includes('=') && 
+                (code.includes("print(my_name)") || code.includes('print( my_name )')) &&
+                /my_name\s*=\s*['"].*['"]/.test(code);
+            
+            if (isValidPython) {
+                result.className = 'success';
+                result.innerHTML = '🎉 정답입니다! 완벽한 파이썬 문법입니다!';
+                document.getElementById('completeBtn').classList.remove('hidden');
+            } else {
+                result.className = 'error';
+                let feedback = '💡 힌트: ';
+                
+                if (!code.includes('my_name')) {
+                    feedback += 'my_name 변수를 사용해보세요. ';
+                }
+                if (!code.includes('=')) {
+                    feedback += '= 연산자로 값을 할당해보세요. ';
+                } else if (!/my_name\s*=\s*['"].*['"]/.test(code)) {
+                    feedback += '문자열은 작은따옴표(\')나 큰따옴표(")로 감싸야 합니다. ';
+                }
+                if (!code.includes('print(my_name)') && !code.includes('print( my_name )')) {
+                    feedback += 'print(my_name)으로 변수를 출력해보세요.';
+                }
+                
+                result.innerHTML = feedback;
+            }
+        }
+        
+        function showHint() {
+            const hintBox = document.getElementById('hintBox');
+            hintBox.style.display = hintBox.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function completeStage() {
+            alert('🎉 단계 1을 완료했습니다! 파이썬 기초를 마스터하셨네요!');
+            goBackToStageSelect();
+        }
+        
+        // 게임 기능
+        let gameActive = false;
+        let gameScore = 0;
+        let gameTotal = 0;
+        let gameTimeLeft = 180;
+        let gameInterval;
+        let timerInterval;
+        let fallingCodes = [];
+        let gameDifficulty = 'easy';
+        
+        const difficultySettings = {
+            easy: { speed: 40, spawnRate: 0.05 },
+            normal: { speed: 25, spawnRate: 0.08 },
+            hard: { speed: 15, spawnRate: 0.12 },
+            extreme: { speed: 10, spawnRate: 0.15 }
+        };
+        
+        const gameCodes = [
+            { code: "print('Hello')", translation: "화면에 출력하다" },
+            { code: "x = 10", translation: "변수 x에 10을 저장하다" },
+            { code: "my_name = '홍길동'", translation: "변수에 이름 저장" },
+            { code: "for i in range(5):", translation: "5번 반복하다" },
+            { code: "if x > 5:", translation: "x가 5보다 크면" },
+            { code: "def my_func():", translation: "내 함수 정의" },
+            { code: "my_list.append(item)", translation: "리스트에 항목 추가" },
+            { code: "len(my_list)", translation: "리스트 길이 구하기" },
+            { code: "return my_value", translation: "값을 반환하다" },
+            { code: "import random", translation: "랜덤 모듈 가져오기" },
+            { code: "class Student:", translation: "학생 클래스 정의" },
+            { code: "try:", translation: "시도해보다" },
+            { code: "except Exception:", translation: "예외 처리하다" },
+            { code: "while True:", translation: "무한 반복" },
+            { code: "my_dict['key']", translation: "딕셔너리 값 접근" }
+        ];
+        
+        function initGame() {
+            gameScore = 0;
+            gameTotal = 0;
+            gameTimeLeft = 180;
+            fallingCodes = [];
+            gameDifficulty = 'easy';
+        }
+        
+        function startGame() {
+            const selectedDifficulty = document.querySelector('input[name="difficulty"]:checked');
+            gameDifficulty = selectedDifficulty ? selectedDifficulty.value : 'easy';
+            
+            gameActive = true;
+            gameScore = 0;
+            gameTotal = 0;
+            gameTimeLeft = 180;
+            fallingCodes = [];
+            
+            document.getElementById('gameInstructions').style.display = 'none';
+            const gameInput = document.getElementById('gameInput');
+            gameInput.disabled = false;
+            gameInput.value = '';
+            gameInput.focus();
+            
+            gameInput.onkeypress = function(e) {
+                if (e.key === 'Enter') {
+                    checkCode();
+                }
+            };
+            
+            startGameLoop();
+            startTimer();
+        }
+        
+        function startGameLoop() {
+            gameInterval = setInterval(() => {
+                if (!gameActive) return;
+                
+                const settings = difficultySettings[gameDifficulty];
+                
+                if (Math.random() < settings.spawnRate) {
+                    createFallingCode();
+                }
+                
+                updateGameUI();
+            }, 100);
+        }
+        
+        function createFallingCode() {
+            const position = getNonOverlappingPosition(280);
+            if (!position) {
+                return;
+            }
+            
+            const randomCode = gameCodes[Math.floor(Math.random() * gameCodes.length)];
+            const gameArea = document.getElementById('gameArea');
+            
+            const codeElement = document.createElement('div');
+            codeElement.className = 'falling-code';
+            codeElement.style.width = '280px';
+            codeElement.style.left = position.x + 'px';
+            codeElement.style.animation = `fall ${difficultySettings[gameDifficulty].speed}s linear`;
+            
+            const formattedCode = randomCode.code.length > 15 ? 
+                randomCode.code.match(/.{1,15}/g).join('\n') : 
+                randomCode.code;
+            
+            codeElement.innerHTML = `
+                <div class="code-text">${formattedCode}</div>
+                <div class="code-translation">${randomCode.translation}</div>
+            `;
+            
+            gameArea.appendChild(codeElement);
+            
+            setTimeout(() => {
+                if (codeElement.parentNode) {
+                    codeElement.remove();
+                }
+                fallingCodes = fallingCodes.filter(item => item.element !== codeElement);
+            }, difficultySettings[gameDifficulty].speed * 1000);
+            
+            fallingCodes.push({
+                element: codeElement,
+                code: randomCode.code
+            });
+            
+            gameTotal++;
+        }
+        
+        function getNonOverlappingPosition(codeWidth) {
+            const gameArea = document.getElementById('gameArea');
+            const areaWidth = gameArea.offsetWidth;
+            const minGap = 100;
+            const positions = [];
+            const step = 30;
+            
+            for (let x = 0; x <= areaWidth - codeWidth; x += step) {
+                let canPlace = true;
+                
+                for (let existing of fallingCodes) {
+                    const existingRight = existing.x + 280;
+                    const newRight = x + codeWidth;
+                    
+                    if ((x >= existing.x - minGap && x <= existingRight + minGap) ||
+                        (newRight >= existing.x - minGap && newRight <= existingRight + minGap)) {
+                        canPlace = false;
+                        break;
+                    }
+                }
+                
+                if (canPlace) {
+                    positions.push(x);
+                }
+            }
+            
+            if (positions.length === 0) {
+                return null;
+            }
+            
+            return {
+                x: positions[Math.floor(Math.random() * positions.length)]
+            };
+        }
+        
+        function checkCode() {
+            const gameInput = document.getElementById('gameInput');
+            const input = gameInput.value.trim();
+            
+            if (!input) return;
+            
+            const matchedIndex = fallingCodes.findIndex(item => item.code === input);
+            
+            if (matchedIndex !== -1) {
+                const matched = fallingCodes[matchedIndex];
+                gameScore++;
+                
+                matched.element.style.background = 'rgba(0, 255, 0, 0.5)';
+                matched.element.style.borderColor = '#0f0';
+                
+                setTimeout(() => {
+                    matched.element.remove();
+                }, 200);
+                
+                fallingCodes.splice(matchedIndex, 1);
+                
+                gameInput.value = '';
+                updateGameUI();
+            }
+        }
+        
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (!gameActive) return;
+                
+                gameTimeLeft--;
+                updateGameUI();
+                
+                if (gameTimeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+        
+        function updateGameUI() {
+            const minutes = Math.floor(gameTimeLeft / 60);
+            const seconds = gameTimeLeft % 60;
+            document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('score').textContent = gameScore;
+        }
+        
+        function endGame() {
+            gameActive = false;
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            
+            fallingCodes.forEach(item => {
+                if (item.element.parentNode) {
+                    item.element.remove();
+                }
+            });
+            fallingCodes = [];
+            
+            const gameArea = document.getElementById('gameArea');
+            gameArea.innerHTML = `
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.9); border: 2px solid #0f0; border-radius: 10px; padding: 30px; text-align: center; color: #0f0; z-index: 1000;">
+                    <h3 style="font-size: 2rem; margin-bottom: 20px;">🎮 게임 종료!</h3>
+                    <div style="font-size: 1.2rem; margin: 10px 0;">🎯 최종 점수: ${gameScore}</div>
+                    <div style="font-size: 1.2rem; margin: 10px 0;">📊 정확도: ${gameTotal > 0 ? Math.round((gameScore / gameTotal) * 100) : 0}%</div>
+                    <div style="font-size: 1.2rem; margin: 10px 0;">⏱️ 시간: 3:00</div>
+                    <div style="margin-top: 20px;">
+                        <button class="button" onclick="restartGame()">🔄 다시하기</button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('gameInput').disabled = true;
+        }
+        
+        function restartGame() {
+            stopGame();
+            
+            const gameArea = document.getElementById('gameArea');
+            gameArea.innerHTML = document.getElementById('gameInstructions').outerHTML;
+            
+            document.getElementById('gameInput').disabled = true;
+            document.getElementById('gameInput').value = '';
+        }
+        
+        function stopGame() {
+            gameActive = false;
+            clearInterval(gameInterval);
+            clearInterval(timerInterval);
+            
+            fallingCodes.forEach(item => {
+                if (item.element.parentNode) {
+                    item.element.remove();
+                }
+            });
+            fallingCodes = [];
+        }
+        
+        // 초기화
+        window.onload = function() {
+            createMatrixRain();
+        };
+        
+        window.onresize = function() {
+            document.getElementById('matrixBg').innerHTML = '';
+            createMatrixRain();
+        };
+    </script>
+</body>
+</html>
