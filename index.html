@@ -814,7 +814,7 @@ print(my_name)"></textarea>
             codeElement.className = 'falling-code';
             codeElement.style.width = '280px';
             codeElement.style.left = position.x + 'px';
-            codeElement.style.animation = `fall ${difficultySettings[gameDifficulty].speed}s linear`;
+            codeElement.style.animation = `fall ${difficultySettings[gameDifficulty].speed}s linear forwards`;
             
             const formattedCode = randomCode.code.length > 15 ? 
                 randomCode.code.match(/.{1,15}/g).join('\n') : 
@@ -838,6 +838,7 @@ print(my_name)"></textarea>
                 element: codeElement,
                 code: randomCode.code,
                 x: position.x,
+                width: codeElement.offsetWidth,
                 spawnTime: Date.now()
             });
             
@@ -847,14 +848,14 @@ print(my_name)"></textarea>
         function getNonOverlappingPosition(codeWidth) {
             const gameArea = document.getElementById('gameArea');
             const areaWidth = gameArea.offsetWidth;
-            const minGap = 20;
+            const minGap = 50;
             const positions = [];
             const step = 30;
             const now = Date.now();
             const speed = difficultySettings[gameDifficulty].speed;
-            // 블록이 상단 영역(자기 높이만큼)을 벗어나는 시간 계산
-            // 블록 높이 ~90px, 게임 영역 500px, 100vh 이동에 speed초
-            const verticalClearTime = (120 / window.innerHeight) * speed * 1000;
+            // 블록이 자기 높이 + 여유 공간만큼 아래로 이동하는 시간 계산
+            // 블록 높이 최대 ~120px + 여유 80px = 200px, 100vh 이동에 speed초
+            const verticalClearTime = (200 / window.innerHeight) * speed * 1000;
 
             // 최근에 생성되어 아직 상단 근처에 있는 블록만 필터링
             const recentCodes = fallingCodes.filter(item =>
@@ -866,7 +867,7 @@ print(my_name)"></textarea>
 
                 for (let existing of recentCodes) {
                     const existingLeft = existing.x;
-                    const existingRight = existing.x + 280;
+                    const existingRight = existing.x + (existing.width || 280);
                     const newRight = x + codeWidth;
 
                     // 수평 겹침 체크: 두 블록의 영역이 minGap 이내로 겹치는지
