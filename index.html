@@ -245,6 +245,7 @@
         
         .falling-code {
             position: absolute;
+            top: 0;
             background: rgba(0, 255, 0, 0.1);
             border: 2px solid #0f0;
             border-radius: 5px;
@@ -835,7 +836,9 @@ print(my_name)"></textarea>
             
             fallingCodes.push({
                 element: codeElement,
-                code: randomCode.code
+                code: randomCode.code,
+                x: position.x,
+                spawnTime: Date.now()
             });
             
             gameTotal++;
@@ -844,33 +847,44 @@ print(my_name)"></textarea>
         function getNonOverlappingPosition(codeWidth) {
             const gameArea = document.getElementById('gameArea');
             const areaWidth = gameArea.offsetWidth;
-            const minGap = 100;
+            const minGap = 20;
             const positions = [];
             const step = 30;
-            
+            const now = Date.now();
+            const speed = difficultySettings[gameDifficulty].speed;
+            // 블록이 상단 영역(자기 높이만큼)을 벗어나는 시간 계산
+            // 블록 높이 ~90px, 게임 영역 500px, 100vh 이동에 speed초
+            const verticalClearTime = (120 / window.innerHeight) * speed * 1000;
+
+            // 최근에 생성되어 아직 상단 근처에 있는 블록만 필터링
+            const recentCodes = fallingCodes.filter(item =>
+                item.spawnTime && (now - item.spawnTime) < verticalClearTime
+            );
+
             for (let x = 0; x <= areaWidth - codeWidth; x += step) {
                 let canPlace = true;
-                
-                for (let existing of fallingCodes) {
+
+                for (let existing of recentCodes) {
+                    const existingLeft = existing.x;
                     const existingRight = existing.x + 280;
                     const newRight = x + codeWidth;
-                    
-                    if ((x >= existing.x - minGap && x <= existingRight + minGap) ||
-                        (newRight >= existing.x - minGap && newRight <= existingRight + minGap)) {
+
+                    // 수평 겹침 체크: 두 블록의 영역이 minGap 이내로 겹치는지
+                    if (x < existingRight + minGap && newRight > existingLeft - minGap) {
                         canPlace = false;
                         break;
                     }
                 }
-                
+
                 if (canPlace) {
                     positions.push(x);
                 }
             }
-            
+
             if (positions.length === 0) {
                 return null;
             }
-            
+
             return {
                 x: positions[Math.floor(Math.random() * positions.length)]
             };
