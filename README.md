@@ -2,6 +2,10 @@
 
 > 파이썬을 누구나 쉽고, 매일매일, 무료로 배울 수 있는 웹사이트
 
+## 🌐 사이트 접속 링크
+
+**👉 [https://isilin-anar.github.io/FunStudyGame/](https://isilin-anar.github.io/FunStudyGame/)**
+
 ---
 
 ## 🎯 프로젝트 목적
